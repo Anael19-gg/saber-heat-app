@@ -1,6 +1,8 @@
 # SABER HEAT — Demo de la PWA
 
-Diseño preliminar y **funcional** de la consola de **SABER HEAT**, un monitor personal de riesgo térmico con forma de sable de energía. Esta demo simula el dispositivo, las lecturas, las alertas y el emparejamiento BLE. Funciona sin base de datos en **modo local** y, si configuras **Neon**, persiste todo en PostgreSQL.
+Diseño **funcional** de la consola de **SABER HEAT**, un monitor personal de riesgo térmico con forma de sable de energía. Esta demo simula el dispositivo, las lecturas, las alertas y el emparejamiento BLE. Funciona sin base de datos en **modo local** y, si configuras **Neon**, persiste todo en PostgreSQL.
+
+App en vivo: [saber-heat-app.vercel.app](https://saber-heat-app.vercel.app)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Anael19-gg/saber-heat-app)
 
@@ -8,13 +10,13 @@ Diseño preliminar y **funcional** de la consola de **SABER HEAT**, un monitor p
 
 ## Qué incluye
 
-- **Panel de control** con temperatura, sensación térmica, humedad, UV, batería y estado de la zona.
+- **Panel** con el estado térmico, la acción pendiente y la hidratación. Sin tarjetas duplicadas ni métricas que ya viven en el header.
 - **Simulación en vivo** cada 3.5 s con cuatro escenarios: obra al sol, running, salón y casa.
 - **Cálculo del índice de calor** con la fórmula de Rothfusz y umbrales configurables.
 - **Sable animado** que cambia de color según la zona: azul, verde, ámbar, rojo y rojo intermitente.
 - **Alertas** con reconocimiento, filtros y trazabilidad.
 - **Historial** de sesión y resumen de 7 días, con exportación a CSV.
-- **Dispositivo** con estado de conexión, batería, señal, sensores, firmware y modo demo.
+- **Dispositivo** con conexión, batería, señal, modo demo y escenario.
 - **Emparejamiento BLE simulado** en tres pasos, con código de 6 dígitos.
 - **Ajustes** de umbrales, unidades (°C/°F), hidratación, notificaciones, sonido, vibración y contacto de emergencia.
 - **Persistencia local** de ajustes e hidratación con `localStorage`.
@@ -22,6 +24,10 @@ Diseño preliminar y **funcional** de la consola de **SABER HEAT**, un monitor p
 - **Sesión firmada** con cookie `HttpOnly` + HMAC-SHA256 y contraseña demo hasheada con scrypt.
 - **Modo local automático**: si no hay `DATABASE_URL` o Neon falla, la UI sigue funcionando.
 - **Interfaz responsive** con sidebar colapsable, tema oscuro y estética sci-fi.
+
+## Diseño
+
+La consola muestra solo lo que cambia una decisión: **temperatura y zona**, la **acción pendiente** y la **hidratación**. Todo lo demás vive en su propia página. Sin tarjetas de métricas repetidas, sin gráficas en el panel y sin datos que ya estén en el header.
 
 ## Stack
 
@@ -162,58 +168,47 @@ La app detecta si existe `DATABASE_URL`. Si está configurada, crea/lee el usuar
 
 ## Capturas
 
-### Neon conectado
+### Panel
 
-![Panel con Neon](public/screens/neon-dashboard.png)
-
-![Dispositivo con Neon](public/screens/neon-dispositivo.png)
-
-![Historial con Neon](public/screens/neon-historial.png)
-
-### Dispositivo y emparejamiento
-
-![Dispositivo](public/screens/dispositivo.png)
-
-| Paso 1 | Paso 3 | Conectado |
-| --- | --- | --- |
-| ![Paso 1](public/screens/emparejamiento-paso-1.png) | ![Paso 3](public/screens/emparejamiento-paso-3.png) | ![Conectado](public/screens/emparejamiento-conectado.png) |
+![Panel con Neon](public/screens/dashboard.png)
 
 ### Historial y alertas
 
-![Historial](public/screens/historial.png)
+![Historial de sesión](public/screens/historial.png)
 
 ![Resumen de 7 días](public/screens/historial-7dias.png)
 
 ![Alertas](public/screens/alertas.png)
 
-### Ajustes y estado extremo
+### Dispositivo y ajustes
+
+![Dispositivo](public/screens/dispositivo.png)
 
 ![Ajustes](public/screens/ajustes.png)
-
-![Estado extremo](public/screens/estado-extremo.png)
 
 ## Estructura del proyecto
 
 ```text
 src/
   app/
-    page.tsx                 # Panel de control
+    page.tsx                 # Panel
     historial/page.tsx       # Historial de sesión y 7 días
     alertas/page.tsx         # Alertas y reconocimientos
-    dispositivo/page.tsx     # Estado, sensores y escenarios
+    dispositivo/page.tsx     # Conexión, modo demo y escenario
     ajustes/page.tsx         # Umbrales y preferencias
+    api/                     # health, session, state, readings, alerts, settings, hydration, device, reset
     globals.css              # Tema, tokens y utilidades
     layout.tsx               # Layout raíz con sidebar
   components/
     app-sidebar.tsx
     app-header.tsx
+    page-header.tsx
     providers.tsx            # Estado global y simulación
     pairing-dialog.tsx
     blade-visual.tsx
     dashboard/
     alerts/
     ui/                      # Componentes de shadcn/ui
-    api/                     # health, session, state, readings, alerts, settings, hydration, device, reset
   lib/
     saber-heat.ts            # Tipos, umbrales, fórmula y datos mock
     db.ts                    # Cliente Neon
@@ -229,11 +224,11 @@ src/
 ## Cómo probar la demo
 
 1. Abre el **Panel** y observa cómo cambian las lecturas cada 3.5 s.
-2. Cambia el escenario en el selector del header: **Obra al sol**, **Running**, **Salón** o **Casa**.
-3. Pulsa **Simular peligro** para forzar una alerta extrema.
-4. Pulsa **Reconocer alerta** o entra a **Alertas** para reconocer eventos.
+2. Entra a **Dispositivo** y cambia el **Escenario**: Obra al sol, Running, Salón o Casa.
+3. En **Dispositivo**, pulsa **Simular alerta** para forzar una alerta extrema.
+4. Reconoce la alerta desde el **Panel** o desde **Alertas**.
 5. Registra agua con **+250 ml** o **+500 ml**.
-6. Ve a **Dispositivo** y prueba **Reemparejar**: el flujo BLE está simulado en tres pasos.
+6. En **Dispositivo**, prueba **Reemparejar**: el flujo BLE está simulado en tres pasos.
 7. En **Historial**, cambia entre **Sesión** y **7 días** y exporta el CSV.
 8. En **Ajustes**, mueve los umbrales y cambia la unidad a Fahrenheit.
 
@@ -273,7 +268,7 @@ El loop de `instant()` de `next-cache-components-optimizer` no aplica a las pág
 - [ ] Service worker para PWA offline.
 - [ ] Web Push con VAPID para alertas al contacto de emergencia.
 - [ ] Tests E2E con Playwright.
-- [ ] Deploy en Vercel.
+- [x] Deploy en Vercel.
 
 ## Créditos
 

@@ -16,7 +16,6 @@ import {
 import { useSaberHeat } from "@/components/providers";
 import { SaberHeatLogo } from "@/components/saber-heat-logo";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -129,37 +128,6 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-auto">
-          <SidebarGroupLabel>Estado</SidebarGroupLabel>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                tooltip={
-                  device.connected
-                    ? "Dispositivo conectado"
-                    : "Dispositivo desconectado"
-                }
-                render={<Link href="/dispositivo" />}
-              >
-                <span
-                  className={cn(
-                    "size-2 shrink-0 rounded-full",
-                    device.connected
-                      ? "bg-chart-3 shadow-[0_0_10px_var(--chart-3)]"
-                      : "bg-muted-foreground",
-                  )}
-                />
-                <span>{device.connected ? "En línea" : "Desconectado"}</span>
-                <Badge
-                  variant="secondary"
-                  className="ml-auto font-mono text-[10px]"
-                >
-                  {device.battery}%
-                </Badge>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>

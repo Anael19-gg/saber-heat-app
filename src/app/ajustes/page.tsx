@@ -4,11 +4,9 @@ import {
   BellRing,
   Check,
   Database,
-  Droplets,
   Info,
   RotateCcw,
   SlidersHorizontal,
-  Thermometer,
   User,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -111,10 +109,10 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title="Ajustes"
-        description="Personaliza umbrales, alertas, hidratación y el contacto de emergencia."
+        description="Umbrales, alertas y contacto de emergencia."
       >
         <Badge
           variant="outline"
@@ -127,10 +125,10 @@ export default function SettingsPage() {
 
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="text-primary" />
-        <AlertTitle>Demo sin base de datos</AlertTitle>
+        <AlertTitle>Persistencia</AlertTitle>
         <AlertDescription>
-          Los ajustes se guardan en el localStorage de este navegador. No hay
-          usuarios, autenticación ni servidor; es un diseño preliminar.
+          Los ajustes se guardan en este navegador y, si Neon está configurado,
+          también en PostgreSQL. El usuario demo no tiene login real.
         </AlertDescription>
       </Alert>
 
@@ -347,16 +345,6 @@ export default function SettingsPage() {
                 </FieldDescription>
               </Field>
 
-              <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-xs text-muted-foreground">
-                <p className="flex items-center gap-2 font-medium text-foreground">
-                  <Droplets className="size-3.5 text-chart-2" />
-                  Meta diaria de hidratación
-                </p>
-                <p className="mt-1">
-                  3 litros por jornada en calor intenso. La app registra vasos
-                  de 250 ml y 500 ml desde el panel.
-                </p>
-              </div>
             </FieldGroup>
           </CardContent>
         </Card>
@@ -368,18 +356,19 @@ export default function SettingsPage() {
               Datos y demo
             </CardTitle>
             <CardDescription>
-              La demo vive en este navegador; puedes reiniciarla cuando quieras.
+              Dónde se guarda la demo y cómo reiniciarla.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-xs text-muted-foreground">
               <p className="flex items-center gap-2 font-medium text-foreground">
-                <Thermometer className="size-3.5 text-primary" />
-                Sin base de datos
+                <Database className="size-3.5 text-primary" />
+                Persistencia
               </p>
               <p className="mt-1">
-                Lecturas, alertas e hidratación se generan en el cliente. El
-                producto real usaría Vercel + Neon; aquí no hay backend.
+                Con Neon, lecturas, alertas y ajustes se guardan en PostgreSQL.
+                Sin <span className="font-mono">DATABASE_URL</span>, todo vive
+                en este navegador.
               </p>
             </div>
 
@@ -396,8 +385,8 @@ export default function SettingsPage() {
                 <DialogHeader>
                   <DialogTitle>¿Reiniciar la demo?</DialogTitle>
                   <DialogDescription>
-                    Se borran los ajustes guardados en este navegador y se vuelve
-                    al estado inicial. No se puede deshacer.
+                    Se reinician las lecturas, alertas, agua y ajustes del demo.
+                    No se puede deshacer.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>

@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  BellRing,
-  Clock3,
-  Download,
-  Flame,
-  Thermometer,
-  TrendingUp,
-} from "lucide-react";
+import { Clock3, Download } from "lucide-react";
 import {
   Bar,
   CartesianGrid,
@@ -22,7 +15,6 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
 import { ReadingChart } from "@/components/dashboard/reading-chart";
 import { useSaberHeat } from "@/components/providers";
-import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -77,10 +69,6 @@ export default function HistoryPage() {
   const maxTemp = readings.length
     ? Math.max(...readings.map((reading) => reading.temperature))
     : 0;
-  const avgTemp = readings.length
-    ? readings.reduce((total, reading) => total + reading.temperature, 0) /
-      readings.length
-    : 0;
   const dangerAlerts = alerts.filter(
     (alert) => alert.zone === "danger" || alert.zone === "extreme",
   ).length;
@@ -115,10 +103,10 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title="Historial"
-        description="Temperatura, sensación térmica y tiempo de exposición. Exporta el historial para tus reportes."
+        description="Temperatura, exposición y alertas."
       >
         <Button
           variant="outline"
@@ -131,35 +119,25 @@ export default function HistoryPage() {
         </Button>
       </PageHeader>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Máx. registrada"
-          value={formatTemp(maxTemp, settings.unit, 1)}
-          hint="Temperatura del aire"
-          icon={Thermometer}
-          tone="orange"
-        />
-        <StatCard
-          label="Promedio"
-          value={formatTemp(avgTemp, settings.unit, 1)}
-          hint="Durante la sesión"
-          icon={TrendingUp}
-          tone="cyan"
-        />
-        <StatCard
-          label="Tiempo en zona roja"
-          value={`${dangerMinutes} min`}
-          hint="Estimado a partir de alertas"
-          icon={Flame}
-          tone="red"
-        />
-        <StatCard
-          label="Alertas"
-          value={`${alerts.length}`}
-          hint={`${alerts.filter((alert) => !alert.acknowledged).length} sin reconocer`}
-          icon={BellRing}
-          tone="violet"
-        />
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-muted-foreground">
+        <span>
+          Máx.{" "}
+          <span className="font-mono text-foreground">
+            {readings.length
+              ? formatTemp(maxTemp, settings.unit, 1)
+              : "—"}
+          </span>
+        </span>
+        <span>
+          Zona roja{" "}
+          <span className="font-mono text-foreground">
+            {dangerMinutes} min
+          </span>
+        </span>
+        <span>
+          Alertas{" "}
+          <span className="font-mono text-foreground">{alerts.length}</span>
+        </span>
       </div>
 
       <Tabs defaultValue="24h" className="gap-4">

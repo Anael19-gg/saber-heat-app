@@ -3,7 +3,6 @@
 import { Droplets, Plus } from "lucide-react";
 
 import { useSaberHeat } from "@/components/providers";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,39 +11,36 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
-export function HydrationCard() {
-  const { waterMl, addWater, settings } = useSaberHeat();
+export function HydrationCard({ className }: { className?: string }) {
+  const { waterMl, addWater } = useSaberHeat();
   const liters = (waterMl / 1000).toFixed(2);
   const percent = Math.min(100, (waterMl / 3000) * 100);
 
   return (
-    <Card className="border-border/60 bg-card/70">
+    <Card
+      className={cn("border-border/60 bg-card/70", className)}
+    >
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
-          <CardTitle className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Hidratación
-          </CardTitle>
-          <Badge variant="secondary" className="text-[10px]">
-            Meta 3 L
-          </Badge>
+          <CardTitle className="text-sm font-medium">Hidratación</CardTitle>
+          <span className="text-[10px] text-muted-foreground">Meta 3 L</span>
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="flex flex-1 flex-col justify-between gap-5">
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-xl bg-chart-2/10 text-chart-2">
             <Droplets className="size-5" />
           </div>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="font-mono text-3xl font-semibold tracking-tight">
+              <span className="font-mono text-4xl font-semibold tracking-tight">
                 {liters}
               </span>
               <span className="text-sm text-muted-foreground">L</span>
             </div>
-            <p className="text-[10px] text-muted-foreground">
-              de 3 L · recordatorio cada {settings.hydrationInterval} min
-            </p>
+            <p className="text-[10px] text-muted-foreground">de 3 L al día</p>
           </div>
         </div>
 

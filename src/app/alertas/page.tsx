@@ -1,11 +1,10 @@
 "use client";
 
-import { BellOff, BellRing, CheckCheck, Flame, ShieldAlert } from "lucide-react";
+import { BellOff, CheckCheck } from "lucide-react";
 
 import { AlertItem } from "@/components/alerts/alert-item";
 import { PageHeader } from "@/components/page-header";
 import { useSaberHeat } from "@/components/providers";
-import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -31,10 +30,6 @@ export default function AlertsPage() {
 
   const pending = alerts.filter((alert) => !alert.acknowledged);
   const acknowledged = alerts.filter((alert) => alert.acknowledged);
-  const severe = alerts.filter(
-    (alert) => alert.zone === "danger" || alert.zone === "extreme",
-  );
-  const lastAlert = alerts[0];
 
   const renderList = (items: typeof alerts) => {
     if (items.length === 0) {
@@ -46,7 +41,7 @@ export default function AlertsPage() {
           <EmptyTitle>Sin alertas en esta vista</EmptyTitle>
           <EmptyDescription>
             Cuando el índice de calor cruce un umbral, la alerta aparecerá
-            aquí y se enviará a la app.
+            aquí.
           </EmptyDescription>
         </Empty>
       );
@@ -67,10 +62,10 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title="Alertas"
-        description="Eventos de riesgo térmico, reconocimientos y trazabilidad de la sesión."
+        description="Tus alertas y reconocimientos."
       >
         <Button
           variant="outline"
@@ -84,44 +79,7 @@ export default function AlertsPage() {
         </Button>
       </PageHeader>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Total"
-          value={`${alerts.length}`}
-          hint="Eventos registrados"
-          icon={BellRing}
-          tone="orange"
-        />
-        <StatCard
-          label="Pendientes"
-          value={`${unacknowledgedCount}`}
-          hint="Requieren reconocimiento"
-          icon={ShieldAlert}
-          tone="red"
-        />
-        <StatCard
-          label="Peligro / extremo"
-          value={`${severe.length}`}
-          hint="Zona roja o extrema"
-          icon={Flame}
-          tone="violet"
-        />
-        <StatCard
-          label="Última alerta"
-          value={
-            lastAlert
-              ? new Intl.DateTimeFormat("es-MX", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                }).format(lastAlert.timestamp)
-              : "—"
-          }
-          hint={lastAlert ? "Hora local del dispositivo" : "Sin eventos"}
-          icon={BellRing}
-          tone="cyan"
-        />
-      </div>
+
 
       <Tabs defaultValue="all" className="gap-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
