@@ -74,6 +74,8 @@ vercel
 vercel --prod
 ```
 
+> En Windows, la CLI puede necesitar **Modo desarrollador** para crear los symlinks de su caché. Si aparece `EPERM: operation not permitted, symlink`, usa la opción A (dashboard) o ejecuta la terminal como administrador.
+
 ### Variables de entorno
 
 | Variable | Obligatoria | Uso |
