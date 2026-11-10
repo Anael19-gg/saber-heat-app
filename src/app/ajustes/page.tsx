@@ -338,7 +338,7 @@ export default function SettingsPage() {
                 <FieldContent>
                   <FieldLabel htmlFor="vibration">Vibración</FieldLabel>
                   <FieldDescription>
-                    Patrón háptico en el dispositivo (versión Pro).
+                    Patrón háptico del dispositivo.
                   </FieldDescription>
                 </FieldContent>
                 <Switch

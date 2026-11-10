@@ -167,7 +167,7 @@ export default function DevicePage() {
           </CardHeader>
           <CardContent className="flex flex-col gap-1">
             {[
-              ["Modelo", "SABER HEAT Go"],
+              ["Modelo", "SABER HEAT"],
               ["Serie", device.serial],
               ["Firmware", device.firmware],
               [
