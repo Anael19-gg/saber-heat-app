@@ -12,6 +12,7 @@ import {
   formatTemp,
   formatTime,
   SCENARIOS,
+  ZONES,
 } from "@/lib/saber-heat";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ export function ZoneOverview() {
   } = useSaberHeat();
 
   const latest = alerts.find((alert) => !alert.acknowledged);
+  const latestZone = latest ? ZONES[latest.zone] : currentZone;
   const temperature =
     settings.unit === "f"
       ? (current.temperature * 9) / 5 + 32
@@ -112,15 +114,15 @@ export function ZoneOverview() {
               <div
                 className={cn(
                   "flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between",
-                  currentZone.bg,
-                  currentZone.border,
+                  latestZone.bg,
+                  latestZone.border,
                 )}
               >
                 <div className="flex items-start gap-3">
                   <span
                     className={cn(
                       "mt-1.5 size-2 shrink-0 rounded-full",
-                      currentZone.dot,
+                      latestZone.dot,
                     )}
                   />
                   <div className="min-w-0">

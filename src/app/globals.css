@@ -87,11 +87,11 @@
   --sidebar-accent-foreground: oklch(0.96 0.01 250);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.7 0.19 45);
-  --zone-safe: oklch(0.75 0.14 205);
-  --zone-caution: oklch(0.72 0.17 150);
-  --zone-high: oklch(0.78 0.16 80);
-  --zone-danger: oklch(0.64 0.24 25);
-  --zone-extreme: oklch(0.5 0.22 25);
+  --zone-safe: oklch(0.7 0.17 255);
+  --zone-caution: oklch(0.74 0.17 150);
+  --zone-high: oklch(0.8 0.16 85);
+  --zone-danger: oklch(0.68 0.22 305);
+  --zone-extreme: oklch(0.64 0.25 27);
 }
 
 @layer base {

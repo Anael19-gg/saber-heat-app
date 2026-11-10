@@ -101,7 +101,7 @@ export function BladeVisual({ className, compact = false }: BladeVisualProps) {
         width="64"
         height="6"
         rx="3"
-        fill="#f97316"
+        fill="currentColor"
       />
 
       <rect

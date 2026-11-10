@@ -19,6 +19,7 @@ import {
   createInitialAlerts,
   createInitialReadings,
   DEFAULT_SETTINGS,
+  getZone,
   INITIAL_DEVICE,
   nextReading,
   round1,
@@ -519,7 +520,7 @@ export function SaberHeatProvider({ children }: { children: React.ReactNode }) {
     });
 
     toast.error("Alerta extrema simulada", {
-      description: "La hoja se pondría en rojo intermitente.",
+      description: "La hoja se pondría en rojo.",
     });
   }, [device.battery, sync]);
 
@@ -560,7 +561,7 @@ export function SaberHeatProvider({ children }: { children: React.ReactNode }) {
           device.battery,
           0,
         );
-  const currentZone = ZONES[current.zone];
+  const currentZone = ZONES[getZone(current.heatIndex, settings.thresholds)];
   const unacknowledgedCount = alerts.filter(
     (alert) => !alert.acknowledged,
   ).length;

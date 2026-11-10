@@ -101,7 +101,7 @@ export const ZONES: Record<Zone, ZoneMeta> = {
   },
   danger: {
     label: "Peligro",
-    short: "Rojo",
+    short: "Morado",
     description: "Riesgo importante",
     advice: "Detente, busca sombra, bebe agua y descansa 15 min.",
     color: "var(--zone-danger)",
@@ -112,7 +112,7 @@ export const ZONES: Record<Zone, ZoneMeta> = {
   },
   extreme: {
     label: "Extremo",
-    short: "Rojo intermitente",
+    short: "Rojo",
     description: "Riesgo extremo",
     advice: "Sombra, agua y ayuda. Si hay síntomas, llama al 911.",
     color: "var(--zone-extreme)",

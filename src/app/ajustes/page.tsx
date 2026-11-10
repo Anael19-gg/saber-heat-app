@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import {
   BellRing,
   Check,
@@ -52,9 +53,12 @@ import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   DEFAULT_SETTINGS,
+  ZONES,
   type Thresholds,
   type Unit,
+  type Zone,
 } from "@/lib/saber-heat";
+import { cn } from "@/lib/utils";
 
 type ThresholdFieldProps = {
   label: string;
@@ -62,8 +66,17 @@ type ThresholdFieldProps = {
   value: number;
   min: number;
   max: number;
+  zone: Zone;
   onChange: (value: number) => void;
 };
+
+const ZONE_ORDER: Zone[] = [
+  "safe",
+  "caution",
+  "high",
+  "danger",
+  "extreme",
+];
 
 function ThresholdField({
   label,
@@ -71,13 +84,19 @@ function ThresholdField({
   value,
   min,
   max,
+  zone,
   onChange,
 }: ThresholdFieldProps) {
+  const meta = ZONES[zone];
+
   return (
     <Field>
       <div className="flex items-center justify-between gap-2">
-        <FieldLabel>{label}</FieldLabel>
-        <span className="font-mono text-xs text-muted-foreground">
+        <FieldLabel className="flex items-center gap-2">
+          <span className={cn("size-2 rounded-full", meta.dot)} />
+          {label}
+        </FieldLabel>
+        <span className="font-mono text-xs" style={{ color: meta.color }}>
           {value} °C
         </span>
       </div>
@@ -86,6 +105,8 @@ function ThresholdField({
         min={min}
         max={max}
         step={1}
+        className="[&_[data-slot=slider-range]]:bg-[var(--threshold-color)] [&_[data-slot=slider-thumb]]:border-[var(--threshold-color)]"
+        style={{ "--threshold-color": meta.color } as CSSProperties}
         onValueChange={(next) => {
           const nextValue = typeof next === "number" ? next : next[0];
           onChange(nextValue ?? value);
@@ -158,6 +179,16 @@ export default function SettingsPage() {
                 Restaurar
               </Button>
             </div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] text-muted-foreground">
+              {ZONE_ORDER.map((zone) => (
+                <span key={zone} className="flex items-center gap-1.5">
+                  <span
+                    className={cn("size-1.5 rounded-full", ZONES[zone].dot)}
+                  />
+                  {ZONES[zone].short}
+                </span>
+              ))}
+            </div>
           </CardHeader>
           <CardContent>
             <FieldGroup>
@@ -167,6 +198,7 @@ export default function SettingsPage() {
                 value={settings.thresholds.caution}
                 min={20}
                 max={30}
+                zone="caution"
                 onChange={(value) => setThreshold("caution", value)}
               />
               <ThresholdField
@@ -175,22 +207,25 @@ export default function SettingsPage() {
                 value={settings.thresholds.high}
                 min={30}
                 max={38}
+                zone="high"
                 onChange={(value) => setThreshold("high", value)}
               />
               <ThresholdField
                 label="Peligro"
-                description="La hoja pasa a rojo. Se activa la alerta y el contacto."
+                description="La hoja pasa a morado. Se activa la alerta y el contacto."
                 value={settings.thresholds.danger}
                 min={38}
                 max={50}
+                zone="danger"
                 onChange={(value) => setThreshold("danger", value)}
               />
               <ThresholdField
                 label="Extremo"
-                description="La hoja parpadea. Se envía la alerta crítica."
+                description="La hoja pasa a rojo. Se envía la alerta crítica."
                 value={settings.thresholds.extreme}
                 min={50}
                 max={55}
+                zone="extreme"
                 onChange={(value) => setThreshold("extreme", value)}
               />
             </FieldGroup>
@@ -251,6 +286,7 @@ export default function SettingsPage() {
                   min={15}
                   max={60}
                   step={5}
+                  className="[&_[data-slot=slider-range]]:bg-chart-2 [&_[data-slot=slider-thumb]]:border-chart-2"
                   onValueChange={(value) => {
                     const nextValue =
                       typeof value === "number" ? value : value[0];

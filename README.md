@@ -13,7 +13,7 @@ App en vivo: [saber-heat-app.vercel.app](https://saber-heat-app.vercel.app)
 - **Panel** con el estado térmico, la acción pendiente y la hidratación. Sin tarjetas duplicadas ni métricas que ya viven en el header.
 - **Simulación en vivo** cada 3.5 s con cuatro escenarios: obra al sol, running, salón y casa.
 - **Cálculo del índice de calor** con la fórmula de Rothfusz y umbrales configurables.
-- **Sable animado** que cambia de color según la zona: azul, verde, ámbar, rojo y rojo intermitente.
+- **Sable animado** que cambia de color según la zona: azul, verde, ámbar, morado y rojo.
 - **Alertas** con reconocimiento, filtros y trazabilidad.
 - **Historial** de sesión y resumen de 7 días, con exportación a CSV.
 - **Dispositivo** con conexión, batería, señal, modo demo y escenario.
@@ -28,6 +28,8 @@ App en vivo: [saber-heat-app.vercel.app](https://saber-heat-app.vercel.app)
 ## Diseño
 
 La consola muestra solo lo que cambia una decisión: **temperatura y zona**, la **acción pendiente** y la **hidratación**. Todo lo demás vive en su propia página. Sin tarjetas de métricas repetidas, sin gráficas en el panel y sin datos que ya estén en el header.
+
+La escala de riesgo usa un color por nivel: **azul** (seguro), **verde** (precaución), **ámbar** (alto), **morado** (peligro) y **rojo** (extremo). El color se aplica al sable, la temperatura, las alertas y los umbrales de Ajustes.
 
 ## Stack
 
