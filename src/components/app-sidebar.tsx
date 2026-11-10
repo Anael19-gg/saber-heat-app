@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -221,21 +222,24 @@ export function AppSidebar() {
                 <ChevronsUpDown className="ml-auto size-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent side="right" align="end" className="w-56">
-                <DropdownMenuLabel>Cuenta demo</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Cuenta demo</DropdownMenuLabel>
+                  <DropdownMenuItem render={<Link href="/dispositivo" />}>
+                    <Cpu />
+                    Dispositivo
+                  </DropdownMenuItem>
+                  <DropdownMenuItem render={<Link href="/ajustes" />}>
+                    <Settings2 />
+                    Ajustes
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem render={<Link href="/dispositivo" />}>
-                  <Cpu />
-                  Dispositivo
-                </DropdownMenuItem>
-                <DropdownMenuItem render={<Link href="/ajustes" />}>
-                  <Settings2 />
-                  Ajustes
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={resetDemo}>
-                  <RotateCcw />
-                  Reiniciar demo
-                </DropdownMenuItem>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={resetDemo}>
+                    <RotateCcw />
+                    Reiniciar demo
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>

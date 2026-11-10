@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -204,21 +205,24 @@ export function AppHeader() {
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Cuenta demo</DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Cuenta demo</DropdownMenuLabel>
+              <DropdownMenuItem render={<Link href="/dispositivo" />}>
+                <Cpu />
+                Dispositivo
+              </DropdownMenuItem>
+              <DropdownMenuItem render={<Link href="/ajustes" />}>
+                <Settings2 />
+                Ajustes
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem render={<Link href="/dispositivo" />}>
-              <Cpu />
-              Dispositivo
-            </DropdownMenuItem>
-            <DropdownMenuItem render={<Link href="/ajustes" />}>
-              <Settings2 />
-              Ajustes
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={resetDemo}>
-              <RotateCcw />
-              Reiniciar demo
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={resetDemo}>
+                <RotateCcw />
+                Reiniciar demo
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
