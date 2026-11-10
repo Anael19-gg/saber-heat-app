@@ -1,6 +1,6 @@
 # SABER HEAT — Demo de la PWA
 
-Diseño preliminar y **funcional** de la consola de **SABER HEAT**, un monitor personal de riesgo térmico con forma de sable de energía. Esta demo simula el dispositivo, las lecturas, las alertas y el emparejamiento BLE. **No necesita base de datos ni hardware.**
+Diseño preliminar y **funcional** de la consola de **SABER HEAT**, un monitor personal de riesgo térmico con forma de sable de energía. Esta demo simula el dispositivo, las lecturas, las alertas y el emparejamiento BLE. Funciona sin base de datos en **modo local** y, si configuras **Neon**, persiste todo en PostgreSQL.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Anael19-gg/saber-heat-app)
 
@@ -18,6 +18,9 @@ Diseño preliminar y **funcional** de la consola de **SABER HEAT**, un monitor p
 - **Emparejamiento BLE simulado** en tres pasos, con código de 6 dígitos.
 - **Ajustes** de umbrales, unidades (°C/°F), hidratación, notificaciones, sonido, vibración y contacto de emergencia.
 - **Persistencia local** de ajustes e hidratación con `localStorage`.
+- **Persistencia opcional en Neon** (PostgreSQL): lecturas, alertas, ajustes, hidratación y estado del dispositivo.
+- **Sesión firmada** con cookie `HttpOnly` + HMAC-SHA256 y contraseña demo hasheada con scrypt.
+- **Modo local automático**: si no hay `DATABASE_URL` o Neon falla, la UI sigue funcionando.
 - **Interfaz responsive** con sidebar colapsable, tema oscuro y estética sci-fi.
 
 ## Stack
@@ -29,6 +32,7 @@ Diseño preliminar y **funcional** de la consola de **SABER HEAT**, un monitor p
 - [Recharts](https://recharts.org/) para las gráficas
 - [Lucide](https://lucide.dev/) para los iconos
 - [Sonner](https://sonner.emilkowal.ski/) para los toasts
+- [Neon](https://neon.tech/) PostgreSQL serverless + `@neondatabase/serverless`
 
 ## Cómo correr
 
@@ -46,6 +50,25 @@ npm run build
 npm start
 ```
 
+### Base de datos Neon (opcional)
+
+1. Copia `.env.example` a `.env.local`.
+2. Rellena `DATABASE_URL` (pooled) y `DIRECT_URL` (direct) con las cadenas de Neon.
+3. Genera los secretos:
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+   node -e "console.log(require('crypto').randomBytes(16).toString('base64url'))"
+   ```
+   Usa el primero como `SESSION_SECRET` y el segundo como `HASH_SALT`.
+4. Crea el esquema y los datos demo:
+   ```bash
+   npm run db:seed
+   ```
+   El seed siembra **24 lecturas y 3 alertas**; volver a ejecutarlo reinicia esas lecturas/alertas del dispositivo demo.
+5. Verifica la conexión en [http://localhost:3000/api/health](http://localhost:3000/api/health). Debe responder `{ "ok": true, "db": "neon" }`.
+
+Sin `DATABASE_URL` la app arranca en **modo local** y todo sigue funcionando con `localStorage`.
+
 ## Deploy en Vercel
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Anael19-gg/saber-heat-app)
@@ -59,7 +82,12 @@ npm start
    - Root Directory: **./**
    - Build Command: **next build**
    - Output Directory: **.next**
-4. No necesitas variables de entorno. Opcional: define `NEXT_PUBLIC_SITE_URL` con tu dominio final.
+4. Configura las variables de entorno (opcionales para modo local, necesarias para Neon):
+   - `DATABASE_URL` — cadena **pooled** de Neon.
+   - `DIRECT_URL` — cadena **directa** de Neon (seed/migraciones).
+   - `SESSION_SECRET` — secreto de 32 bytes en base64url.
+   - `HASH_SALT` — sal de 16 bytes en base64url.
+   - `NEXT_PUBLIC_SITE_URL` — tu dominio final (opcional).
 5. Pulsa **Deploy**.
 
 Cada push a `main` despliega producción; cada PR genera un preview automático.
@@ -80,16 +108,67 @@ vercel --prod
 
 | Variable | Obligatoria | Uso |
 | --- | --- | --- |
+| `DATABASE_URL` | Para Neon | Cadena **pooled** de Neon usada por las rutas API. Sin ella, modo local. |
+| `DIRECT_URL` | Para seed | Cadena **directa** de Neon para `npm run db:seed` y migraciones. |
+| `SESSION_SECRET` | Para Neon | Firma la cookie de sesión con HMAC-SHA256. |
+| `HASH_SALT` | Para Neon | Sal para el hash scrypt del usuario demo. |
 | `NEXT_PUBLIC_SITE_URL` | No | URL canónica para metadata, Open Graph y sitemap. En Vercel se usa `VERCEL_URL` automáticamente si no la defines. |
 
 ### Notas de despliegue
 
 - `.nvmrc` fija **Node 22** en Vercel.
-- No hay base de datos, secretos ni servicios externos.
+- La base de datos es opcional; sin `DATABASE_URL` la app arranca en modo local.
+- Si configuras Neon, agrega las variables en **Vercel → Project → Settings → Environment Variables**.
+- En Vercel, el esquema se crea en el primer `POST /api/session`. Para tener las 24 lecturas/3 alertas iniciales, corre `npm run db:seed` localmente contra la misma base.
 - `poweredByHeader: false` para no exponer la tecnología.
 - El proyecto se puede importar desde GitHub o desplegar con la CLI.
+- En Windows, la CLI de Vercel puede requerir **Modo desarrollador** para symlinks; el dashboard es la ruta recomendada.
+
+## Neon / Base de datos
+
+La app detecta si existe `DATABASE_URL`. Si está configurada, crea/lee el usuario demo, el dispositivo, las lecturas, las alertas y los ajustes desde PostgreSQL. Si falla o no existe, cae en **modo local** sin romper la UI.
+
+### Esquema
+
+- `app_users`: usuario demo con `password_hash` (scrypt).
+- `devices`: dispositivo BLE.
+- `readings`: temperatura, humedad, índice, UV, zona y batería.
+- `alerts`: eventos y reconocimiento.
+- `app_settings`: umbrales, escenario, agua y preferencias.
+
+### API
+
+| Ruta | Método | Uso |
+| --- | --- | --- |
+| `/api/health` | GET | Prueba `select 1` contra Neon. |
+| `/api/session` | POST | Crea/renueva la sesión firmada. |
+| `/api/state` | GET | Hidrata el estado del demo. |
+| `/api/readings` | POST | Guarda una lectura. |
+| `/api/alerts` | POST | Guarda una alerta. |
+| `/api/alerts/:id` | PATCH | Reconoce una alerta. |
+| `/api/alerts/ack-all` | POST | Reconoce todas. |
+| `/api/settings` | PUT | Guarda umbrales y preferencias. |
+| `/api/hydration` | POST | Suma agua. |
+| `/api/device` | PATCH | Conecta/desconecta. |
+| `/api/reset` | POST | Reinicia el demo y vuelve a sembrar 24 lecturas/3 alertas. |
+
+### Seguridad
+
+- Cookie `saber_session` **HttpOnly**, `SameSite=Lax`, `Secure` en Vercel/HTTPS, firmada con **HMAC-SHA256** usando `SESSION_SECRET`.
+- Contraseña demo hasheada con **scrypt** y `HASH_SALT`; no se guarda en claro.
+- `.env.local` está en `.gitignore`; el repo solo incluye `.env.example`.
+- El usuario demo se crea automáticamente; **no hay login real multiusuario** todavía.
+- **Importante:** si compartiste la contraseña de Neon en un chat, rótala en el panel de Neon y actualiza `.env.local`/Vercel.
 
 ## Capturas
+
+### Neon conectado
+
+![Panel con Neon](public/screens/neon-dashboard.png)
+
+![Dispositivo con Neon](public/screens/neon-dispositivo.png)
+
+![Historial con Neon](public/screens/neon-historial.png)
 
 ### Dispositivo y emparejamiento
 
@@ -134,8 +213,17 @@ src/
     dashboard/
     alerts/
     ui/                      # Componentes de shadcn/ui
+    api/                     # health, session, state, readings, alerts, settings, hydration, device, reset
   lib/
     saber-heat.ts            # Tipos, umbrales, fórmula y datos mock
+    db.ts                    # Cliente Neon
+    security.ts              # HMAC de sesión + hash scrypt
+    session.ts               # Cookie HttpOnly
+    neon-repo.ts             # Consultas y persistencia
+    api-types.ts             # Contratos de la API
+  scripts/
+    seed.mjs                 # Esquema + datos demo
+    check-db.mjs             # Prueba de conexión
 ```
 
 ## Cómo probar la demo
@@ -151,10 +239,10 @@ src/
 
 ## Notas y limitaciones
 
-- **No hay base de datos.** Todo el estado vive en el cliente y se pierde si borras el storage del navegador.
+- **La base es opcional.** Sin `DATABASE_URL`, todo vive en el cliente. Con Neon, persiste en PostgreSQL; el usuario demo se crea solo y no hay login multiusuario.
 - **No hay Bluetooth real.** El diálogo de emparejamiento simula el flujo; el producto final usaría `Web Bluetooth` en Android y una app nativa o modo Wi-Fi en iOS.
 - **Los datos son simulados.** La fórmula del índice de calor es real, pero las lecturas no vienen de un sensor físico.
-- **Es un diseño preliminar.** No incluye autenticación, backend, service worker para offline ni notificaciones push reales.
+- **Es un diseño preliminar.** No incluye autenticación real, service worker para offline ni notificaciones push reales.
 - **No es un dispositivo médico.** El producto real debe evitar claims de diagnóstico y cumplir la normativa aplicable (NOM-015-STPS, LFPDPPP/LGPDPPSO, COFEPRIS, IFT, PROFECO).
 - **Los umbrales** se configuran en °C; la vista convierte a °F.
 
@@ -162,26 +250,28 @@ src/
 
 La app está pensada para Vercel y para que el shell se pinte de inmediato:
 
-- **Todas las rutas son estáticas** (`○ Static`): `/`, `/historial`, `/alertas`, `/dispositivo`, `/ajustes`, `/manifest.webmanifest`, `/robots.txt`, `/sitemap.xml`, `/opengraph-image` y `/twitter-image`.
+- **Las páginas son estáticas** (`○ Static`): `/`, `/historial`, `/alertas`, `/dispositivo`, `/ajustes`, `/manifest.webmanifest`, `/robots.txt`, `/sitemap.xml`, `/opengraph-image` y `/twitter-image`.
+- **Las rutas API son dinámicas** (`ƒ`) y no bloquean el shell: el estado se hidrata desde `/api/state` después del montaje.
 - **Cache Components** y **Partial Prefetching** están activos en `next.config.ts`.
-- **No hay datos de servidor** que bloqueen el render: la simulación vive en el cliente. Por eso no hay waterfall ni un Suspense que esconda el shell.
+- **El shell nunca espera a Neon**: la simulación vive en el cliente y la base se consulta en segundo plano.
 - **Fuentes self-hosted** con `next/font` (Space Grotesk + IBM Plex Mono).
 - **`optimizePackageImports`** para `lucide-react` y `recharts`.
 - **Metadata de producción**: título por ruta, Open Graph, Twitter Card, manifest PWA, iconos 192/512, Apple Touch, `robots.txt` y `sitemap.xml`.
 - **`poweredByHeader: false`** para no exponer la tecnología.
 - **PWA base**: manifest e iconos listos; falta el service worker para offline (roadmap).
 
-El loop de `instant()` de `next-cache-components-optimizer` no aplica aquí: no hay lecturas request-time que bloqueen la navegación. El shell completo es estático y se sirve desde el CDN de Vercel. Si después agregas datos de Neon, el patrón es mover la lectura detrás de `<Suspense>` y cachear solo lo reutilizable.
+El loop de `instant()` de `next-cache-components-optimizer` no aplica a las páginas: siguen siendo estáticas y el shell se sirve desde el CDN. La hidratación de Neon ocurre después del montaje, así que no hay un `await` request-time que retrase la primera pintura. Si en el futuro mueves la lectura a un Server Component, el patrón es envolverla en `<Suspense>` con un skeleton útil y cachear solo lo reutilizable.
 
 ## Roadmap
 
 - [x] Manifest PWA, iconos 192/512, Apple Touch y metadata Open Graph/Twitter.
-- [x] Producción: `robots.txt`, `sitemap.xml`, 404 y error boundary.
+- [x] Producción: `robots.txt`, `sitemap.xml`, 404 y error boundary global.
+- [x] Persistencia en Neon (demo de un usuario) con sesión HMAC y hash scrypt.
+- [x] API de estado, lecturas, alertas, ajustes, hidratación, dispositivo y reset.
 - [ ] Conectar `Web Bluetooth` real y el servicio GATT del ESP32-C3.
-- [ ] Backend en Vercel + Neon para historial multisesión.
+- [ ] Multiusuario y autenticación real (login, CSRF y rate limiting).
 - [ ] Service worker para PWA offline.
 - [ ] Web Push con VAPID para alertas al contacto de emergencia.
-- [ ] Autenticación y multi-dispositivo.
 - [ ] Tests E2E con Playwright.
 - [ ] Deploy en Vercel.
 

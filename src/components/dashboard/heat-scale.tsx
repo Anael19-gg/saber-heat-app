@@ -15,6 +15,11 @@ export function HeatScale() {
     100,
     Math.max(0, ((current.heatIndex - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100),
   );
+  const unitLabel = settings.unit === "f" ? "°F" : "°C";
+  const formatScale = (celsius: number) =>
+    `${Math.round(
+      settings.unit === "f" ? (celsius * 9) / 5 + 32 : celsius,
+    )}°`;
 
   return (
     <Card className="border-border/60 bg-card/70">
@@ -38,7 +43,8 @@ export function HeatScale() {
           Índice de calor actual{" "}
           <span className="font-mono font-medium text-foreground">
             {formatTemp(current.heatIndex, settings.unit, 1)}
-          </span>
+          </span>{" "}
+          · escala en {unitLabel}
         </p>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -60,32 +66,32 @@ export function HeatScale() {
             }}
           />
           <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground">
-            <span>{SCALE_MIN}°</span>
-            <span>{settings.thresholds.caution}°</span>
-            <span>{settings.thresholds.high}°</span>
-            <span>{settings.thresholds.danger}°</span>
-            <span>{settings.thresholds.extreme}°</span>
-            <span>{SCALE_MAX}°</span>
+            <span>{formatScale(SCALE_MIN)}</span>
+            <span>{formatScale(settings.thresholds.caution)}</span>
+            <span>{formatScale(settings.thresholds.high)}</span>
+            <span>{formatScale(settings.thresholds.danger)}</span>
+            <span>{formatScale(settings.thresholds.extreme)}</span>
+            <span>{formatScale(SCALE_MAX)}</span>
           </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
           {(
             [
-              ["safe", `< ${settings.thresholds.caution}°`],
+              ["safe", `< ${formatScale(settings.thresholds.caution)}`],
               [
                 "caution",
-                `${settings.thresholds.caution}–${settings.thresholds.high}°`,
+                `${formatScale(settings.thresholds.caution)}–${formatScale(settings.thresholds.high)}`,
               ],
               [
                 "high",
-                `${settings.thresholds.high}–${settings.thresholds.danger}°`,
+                `${formatScale(settings.thresholds.high)}–${formatScale(settings.thresholds.danger)}`,
               ],
               [
                 "danger",
-                `${settings.thresholds.danger}–${settings.thresholds.extreme}°`,
+                `${formatScale(settings.thresholds.danger)}–${formatScale(settings.thresholds.extreme)}`,
               ],
-              ["extreme", `> ${settings.thresholds.extreme}°`],
+              ["extreme", `> ${formatScale(settings.thresholds.extreme)}`],
             ] as const
           ).map(([zone, range]) => {
             const meta = ZONES[zone];

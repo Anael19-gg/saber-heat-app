@@ -7,6 +7,7 @@ import {
   Bluetooth,
   ChevronRight,
   Cpu,
+  Database,
   Footprints,
   HardHat,
   House,
@@ -72,7 +73,8 @@ const scenarioIcons: Record<ScenarioId, typeof HardHat> = {
 
 export function AppHeader() {
   const pathname = usePathname();
-  const { settings, device, updateSettings, resetDemo } = useSaberHeat();
+  const { settings, device, dbMode, updateSettings, resetDemo } =
+    useSaberHeat();
   const meta = pageMeta[pathname] ?? {
     title: "SABER HEAT",
     description: "Consola de monitoreo",
@@ -105,6 +107,20 @@ export function AppHeader() {
             )}
           />
           {isLive ? "Demo en vivo" : "Demo pausado"}
+        </Badge>
+        <Badge
+          variant="outline"
+          className={cn(
+            "ml-1 hidden gap-1.5 border-border/70 bg-card/60 text-[10px] md:inline-flex",
+            dbMode === "online" ? "text-chart-3" : "text-muted-foreground",
+          )}
+        >
+          <Database className="size-3" />
+          {dbMode === "online"
+            ? "Neon"
+            : dbMode === "connecting"
+              ? "Conectando"
+              : "Local"}
         </Badge>
       </div>
 

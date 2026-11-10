@@ -6,6 +6,7 @@ import {
   Bluetooth,
   CheckCircle2,
   Cpu,
+  Database,
   Download,
   Footprints,
   Flame,
@@ -88,6 +89,7 @@ export default function DevicePage() {
     device,
     settings,
     currentZone,
+    dbMode,
     connectDevice,
     disconnectDevice,
     updateSettings,
@@ -101,6 +103,20 @@ export default function DevicePage() {
         title="Dispositivo"
         description="Estado de la conexión, sensores, firmware y escenarios de simulación."
       >
+        <Badge
+          variant="outline"
+          className={cn(
+            "gap-1.5 border-border/70 bg-card/60 text-[10px]",
+            dbMode === "online" ? "text-chart-3" : "text-muted-foreground",
+          )}
+        >
+          <Database className="size-3" />
+          {dbMode === "online"
+            ? "Neon conectado"
+            : dbMode === "connecting"
+              ? "Conectando"
+              : "Modo local"}
+        </Badge>
         <Button
           variant="outline"
           size="sm"
@@ -232,6 +248,14 @@ export default function DevicePage() {
                 ["Firmware", device.firmware],
                 ["Sensor", "SHT30 · ±0.3 °C / ±2 % HR"],
                 ["Conectividad", "BLE 5.0 · Wi-Fi opcional"],
+                [
+                  "Base de datos",
+                  dbMode === "online"
+                    ? "Neon"
+                    : dbMode === "connecting"
+                      ? "Conectando"
+                      : "Modo local",
+                ],
                 ["Última sync", device.connected ? "Ahora" : "—"],
               ].map(([label, value]) => (
                 <div
