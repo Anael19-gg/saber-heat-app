@@ -2,6 +2,8 @@
 
 Diseño preliminar y **funcional** de la consola de **SABER HEAT**, un monitor personal de riesgo térmico con forma de sable de energía. Esta demo simula el dispositivo, las lecturas, las alertas y el emparejamiento BLE. **No necesita base de datos ni hardware.**
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Anael19-gg/saber-heat-app)
+
 ![Panel de control](public/screens/dashboard.png)
 
 ## Qué incluye
@@ -43,6 +45,47 @@ Para compilar:
 npm run build
 npm start
 ```
+
+## Deploy en Vercel
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Anael19-gg/saber-heat-app)
+
+### Opción A · Dashboard (recomendada)
+
+1. Entra a [vercel.com/new](https://vercel.com/new).
+2. Importa el repositorio `Anael19-gg/saber-heat-app`.
+3. Vercel detecta **Next.js** automáticamente. Deja los valores por defecto:
+   - Framework Preset: **Next.js**
+   - Root Directory: **./**
+   - Build Command: **next build**
+   - Output Directory: **.next**
+4. No necesitas variables de entorno. Opcional: define `NEXT_PUBLIC_SITE_URL` con tu dominio final.
+5. Pulsa **Deploy**.
+
+Cada push a `main` despliega producción; cada PR genera un preview automático.
+
+### Opción B · CLI
+
+```bash
+npm i -g vercel
+vercel login
+cd C:\Users\Anael\.t3\projects\ideas\saber-heat-app
+vercel
+vercel --prod
+```
+
+### Variables de entorno
+
+| Variable | Obligatoria | Uso |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | No | URL canónica para metadata, Open Graph y sitemap. En Vercel se usa `VERCEL_URL` automáticamente si no la defines. |
+
+### Notas de despliegue
+
+- `.nvmrc` fija **Node 22** en Vercel.
+- No hay base de datos, secretos ni servicios externos.
+- `poweredByHeader: false` para no exponer la tecnología.
+- El proyecto se puede importar desde GitHub o desplegar con la CLI.
 
 ## Capturas
 
@@ -109,15 +152,32 @@ src/
 - **No hay base de datos.** Todo el estado vive en el cliente y se pierde si borras el storage del navegador.
 - **No hay Bluetooth real.** El diálogo de emparejamiento simula el flujo; el producto final usaría `Web Bluetooth` en Android y una app nativa o modo Wi-Fi en iOS.
 - **Los datos son simulados.** La fórmula del índice de calor es real, pero las lecturas no vienen de un sensor físico.
-- **Es un diseño preliminar.** No incluye autenticación, backend, PWA instalable ni notificaciones push reales.
+- **Es un diseño preliminar.** No incluye autenticación, backend, service worker para offline ni notificaciones push reales.
 - **No es un dispositivo médico.** El producto real debe evitar claims de diagnóstico y cumplir la normativa aplicable (NOM-015-STPS, LFPDPPP/LGPDPPSO, COFEPRIS, IFT, PROFECO).
 - **Los umbrales** se configuran en °C; la vista convierte a °F.
 
+## Rendimiento y Next.js
+
+La app está pensada para Vercel y para que el shell se pinte de inmediato:
+
+- **Todas las rutas son estáticas** (`○ Static`): `/`, `/historial`, `/alertas`, `/dispositivo`, `/ajustes`, `/manifest.webmanifest`, `/robots.txt`, `/sitemap.xml`, `/opengraph-image` y `/twitter-image`.
+- **Cache Components** y **Partial Prefetching** están activos en `next.config.ts`.
+- **No hay datos de servidor** que bloqueen el render: la simulación vive en el cliente. Por eso no hay waterfall ni un Suspense que esconda el shell.
+- **Fuentes self-hosted** con `next/font` (Space Grotesk + IBM Plex Mono).
+- **`optimizePackageImports`** para `lucide-react` y `recharts`.
+- **Metadata de producción**: título por ruta, Open Graph, Twitter Card, manifest PWA, iconos 192/512, Apple Touch, `robots.txt` y `sitemap.xml`.
+- **`poweredByHeader: false`** para no exponer la tecnología.
+- **PWA base**: manifest e iconos listos; falta el service worker para offline (roadmap).
+
+El loop de `instant()` de `next-cache-components-optimizer` no aplica aquí: no hay lecturas request-time que bloqueen la navegación. El shell completo es estático y se sirve desde el CDN de Vercel. Si después agregas datos de Neon, el patrón es mover la lectura detrás de `<Suspense>` y cachear solo lo reutilizable.
+
 ## Roadmap
 
+- [x] Manifest PWA, iconos 192/512, Apple Touch y metadata Open Graph/Twitter.
+- [x] Producción: `robots.txt`, `sitemap.xml`, 404 y error boundary.
 - [ ] Conectar `Web Bluetooth` real y el servicio GATT del ESP32-C3.
 - [ ] Backend en Vercel + Neon para historial multisesión.
-- [ ] `manifest.json` + service worker para PWA instalable y offline.
+- [ ] Service worker para PWA offline.
 - [ ] Web Push con VAPID para alertas al contacto de emergencia.
 - [ ] Autenticación y multi-dispositivo.
 - [ ] Tests E2E con Playwright.
