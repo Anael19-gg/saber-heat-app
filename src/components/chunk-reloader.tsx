@@ -7,7 +7,7 @@ export function ChunkReloader() {
     const onError = (event: ErrorEvent) => {
       const message = String(event.error?.message ?? event.message ?? "");
       if (
-        !/ChunkLoadError|Loading chunk|Failed to fetch dynamically imported module/i.test(
+        !/ChunkLoadError|Loading chunk|Loading CSS chunk|Failed to load chunk|Failed to fetch dynamically imported module|_next\/static\/chunks/i.test(
           message,
         )
       ) {
